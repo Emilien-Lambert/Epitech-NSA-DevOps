@@ -1,0 +1,65 @@
+- name: Install sudo
+  apt:
+    pkg:
+      - sudo
+
+- name: Apt update
+  apt:
+    update_cache: yes
+
+- name: Replace sudoers config
+  template:
+    src: sudoers
+    dest: /etc/sudoers.d/sudoers
+
+- name: Replace hosts config
+  template:
+    src: hosts
+    dest: /etc/hosts
+
+- name: Replace sshd config
+  template:
+    src: sshd_config
+    dest: /etc/ssh/sshd_config
+
+- name: make directory ssh
+  file:
+    path: "/home/debian/.ssh"
+    state: directory
+
+- name: Replace authorized_keys
+  template:
+    src: authorized_keys
+    dest: /home/debian/.ssh/authorized_keys
+
+- name: Replace authorized_keys for gitlab-runner
+  shell: echo "" >> /home/debian/.ssh/authorized_keys && echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDOF0sQRIjxqPItnbSE1e6DHGgObSN6QjgpdOQp4uTfk8jQRGh4/ZRbYixD5nV3tIYMT1Rxf8x5lTmSWgznX07zZzUwwv7R7
+    Z/0O8sei6Z6vudAFy6PukwwYIACztHZ1I3UzVoS3yGKELIBLk1Fe+1lSqedvtk6LYZkxIuGpurKhBCnrDlFL5kJhEfXMHJegxCHWjIXZahxFZKtgxjVjqvyFGMW5OSWEcZrKm
+    9TcMfP6YVOEkv/kDfajXdkuAjItqqHNTb1mVWB9iQ/UFDzAXq+OgFSI4gvB7FnXdmtsg5uWS6AA6exWTsNSzZYUaT/n0CTd5laskI9Lw1A+SICGk6HMVqOcSvVT9+2M1DD37A
+    aNcUps7hy+Bh1Ymy6DyniXJCTjZted2Ol6KEWkkH41TR2fkvxBx13LhLVb57UxBhdNU1fnUjymhTbyltRZdW+HG9S/VQZDGxc6mlD7FVf+1HY8Kwt2MjLyIPKF2t3RRNBDSdE
+    s31kZAXLeZPSm99nreScaD+RMCPAh6XJWQMQ3DLlXM/jTVoJv9JQwcHCljaT3bAmV07V/MsV7qjfj2SPkF3u7YYqWcK5Y2l8fr65eoQfpGhRtNME5RTBnp8poMIVCjb4Q/kB0
+    mppisy6QSsUUxyAaIbkoZmn0iMXW0S77yhdqypuq6wPHWr6BIbnRthK8w== root@pc-66" >> /home/debian/.ssh/authorized_keys
+
+- name: Delete .bash_logout
+  shell: rm /home/debian/.bash_logout
+
+- name: Replace gitlab ssh key id_rsa
+  template:
+    src: id_rsa
+    dest: /home/debian/.ssh/id_rsa
+
+- name: Replace gitlab ssh key id_rsa.pub
+  template:
+    src: id_rsa.pub
+    dest: /home/debian/.ssh/id_rsa.pub
+
+- name: Install git
+  apt:
+    pkg:
+      - git
+
+- name: add hostname to hosts
+  shell: echo "192.168.1.46 my.gitlab.local" >> /etc/hosts
+
+- name: valide finger print
+  shell: ssh-keygen -F my.gitlab.local || ssh-keyscan my.gitlab.local >> /home/debian/.ssh/known_hosts

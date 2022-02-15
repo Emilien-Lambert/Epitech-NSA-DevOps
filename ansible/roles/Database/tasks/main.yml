@@ -1,0 +1,47 @@
+- name: Installation de Systemctl
+  apt:
+    pkg:
+      - systemd
+    state: latest
+
+- name: Installation de gnupg
+  apt:
+    pkg:
+      - gnupg
+    state: latest
+
+- name: Installation de wget
+  apt:
+    pkg:
+    - wget
+    state: latest
+
+- name: Préparation Installation de Mysql
+  shell: export DEBIAN_FRONTEND=noninteractive && export PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin && cd /tmp && wget https://dev.mysql.com/get/mysql-apt-config_0.8.16-1_all.deb && dpkg -i $(ls | grep mysql) && apt update
+
+- name: Installation de mysql
+  apt:
+    pkg:
+      - mysql-server
+    state: latest
+
+- name: replace mysqld.cnf
+  template:
+    src: mysqld.cnf
+    dest: /etc/mysql/mysql.conf.d/mysqld.cnf
+
+- name: Démarage du serveur Mysql
+  shell: systemctl start mysql
+
+- name: Copie du script SQL
+  template:
+    src: user.sql
+    dest: /
+
+- name: Execution du script sql
+  shell: mysql -u root < /user.sql
+
+- name: Creation du dossier de sauvegarde
+  file:
+    path: /saves
+    state: directory

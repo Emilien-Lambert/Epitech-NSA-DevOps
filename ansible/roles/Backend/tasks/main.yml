@@ -1,0 +1,62 @@
+- name: Install php-cli && curl
+  apt:
+    pkg:
+      - php-cli
+      - php-fpm
+      - php-curl
+      - php-xml
+      - php-common
+      - php-gd
+      - php-mysql
+      - php-intl
+      - php-xsl
+      - php-mbstring
+      - php-zip
+      - php-bcmath
+      - php-soap
+      - php-xdebug
+      - php-imagick
+      - unzip
+      - curl
+      - nginx
+    state: latest
+
+- name: get composer
+  shell: cd /tmp && curl -sS https://getcomposer.org/installer -o composer-setup.php
+
+- name: install composer
+  shell: cd /tmp && php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+
+- name: Clone repo
+  become_user: debian
+  git:
+    repo: git@my.gitlab.local:root/devops85-backend.git
+    key_file: '/home/debian/.ssh/id_rsa'
+    dest: /home/debian/devops85-backend
+    clone: yes
+    force: yes
+
+- name: Give right to nginix
+  shell: "chown -R www-data: /home/debian/devops85-backend/bootstrap/ /home/debian/devops85-backend/storage/"
+
+- name: Replace nginx config
+  template:
+    src: mysite.conf
+    dest: /etc/nginx/sites-available/default
+
+- name: Restart nginix
+  shell: systemctl restart nginx
+
+- name: Replace .env
+  template:
+    src: .env
+    dest: /home/debian/devops85-backend/.env
+
+- name: Composer update
+  shell: cd /home/debian/devops85-backend && composer update --no-interaction
+
+- name: Composer install
+  shell: cd /home/debian/devops85-backend && composer install --no-interaction
+
+- name: Migration shema bdd
+  shell: cd /home/debian/devops85-backend && php artisan migrate --force

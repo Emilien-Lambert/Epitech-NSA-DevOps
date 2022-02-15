@@ -1,0 +1,41 @@
+- name: Install npm & nodejs & nginx
+  apt:
+    pkg:
+      - npm
+      - nodejs
+      - nginx
+    state: latest
+
+- name: Clone repo
+  become_user: debian
+  git:
+    repo: git@my.gitlab.local:root/devops85-frontend.git
+    key_file: '/home/debian/.ssh/id_rsa'
+    dest: /home/debian/devops85-frontend
+    clone: yes
+
+- name: npm install angular/cli
+  shell: npm install -g @angular/cli
+
+- name: install google chrome
+  shell: wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && sh -c 'echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' && apt-get update && apt install -y google-chrome-stable
+
+- name: run npm install
+  become_user: debian
+  shell: cd devops85-frontend/ && npm install
+
+- name: Replace environement.ts
+  template:
+    src: environment.ts
+    dest: /home/debian/devops85-frontend/src/environments/environment.ts
+
+- name: Build project
+  shell: cd devops85-frontend/ && npm run build
+
+- name: Move config nginix
+  template:
+    src: mysite.conf
+    dest: /etc/nginx/sites-available/default
+
+- name: Restart nginix
+  shell: systemctl restart nginx

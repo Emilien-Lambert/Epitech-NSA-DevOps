@@ -1,0 +1,12 @@
+---
+- hosts: BDD
+  become: true
+  become_user: "root"
+  become_method: su
+  environment:
+    path: /usr/local/sbin:/usr/sbin:/sbin
+    debian_frontend: noninteractive
+  tasks:
+    - name: Sauvegarde de la base de données
+      shell: mysqldump -u root -p"root" --all-databases | gzip > /saves/save_$(date +"%Y-%m-%d_%H:%M").sql.gz
+...

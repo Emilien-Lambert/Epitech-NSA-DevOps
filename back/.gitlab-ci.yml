@@ -1,0 +1,45 @@
+stages:
+  - build
+  - test
+  - deploy
+
+composer:
+  stage: build
+  image: composer
+  script:
+    - cp .env.example .env
+    - composer update
+    - composer install
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-npm
+    paths:
+      - vendor/
+  artifacts:
+    expire_in: 2 hours
+    paths:
+      - vendor/
+      - .env
+  only:
+    - master
+
+npm:
+  stage: build
+  image: ./Dockerfile
+  script:
+    - npm install
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-npm
+    paths:
+      - node_modules/
+  artifacts:
+    expire_in: 2 hours
+    paths:
+      - public/
+  only:
+    - master
+
+test:
+  stage: test
+  image: vincentcau/laravel-docker:latest
+  script:
+    - vendor/bin/phpunit tests

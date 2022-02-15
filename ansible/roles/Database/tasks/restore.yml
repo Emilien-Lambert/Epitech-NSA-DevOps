@@ -1,0 +1,12 @@
+---
+- hosts: BDD
+  become: true
+  become_user: "root"
+  become_method: su
+  environment:
+    path: /usr/local/sbin:/usr/sbin:/sbin
+    debian_frontend: noninteractive
+  tasks:
+    - name: Retablissement de la sauvegarde de la base de données
+      shell: mysql -u root -p --all-databases < gzip -d ls -Art /saves | tail -n 1
+...

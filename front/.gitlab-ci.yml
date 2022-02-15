@@ -1,0 +1,37 @@
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  image: trion/ng-cli
+  allow_failure: false
+  before_script:
+    - npm ci
+  script:
+    - ng build --prod
+  artifacts:
+    expire_in: 2 hours
+    paths:
+      - dist/
+  only:
+    - dev
+  # tags:
+  #   - deployment
+
+variables:
+  CLI_VERSION: latest
+
+test:karma:
+  stage: test
+  image: trion/ng-cli-karma:${CLI_VERSION}
+  allow_failure: false
+  before_script:
+    - npm i
+    # - export CHROME_BIN=/usr/bin/google-chrome
+  script:
+    - npm test
+  coverage: '/Lines \W+: (\d+\.\d+)%.*/'
+  # tags:
+  #   - deployment

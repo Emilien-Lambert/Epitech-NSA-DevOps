@@ -1,0 +1,6 @@
+[db]
+IP
+
+[db:vars]
+ansible_python_interpreter=/usr/bin/python3
+pubkey=Clés ssh

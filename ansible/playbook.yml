@@ -1,0 +1,25 @@
+- name: All Server
+  hosts: All
+  become: yes
+  become_user: root
+  become_method: su
+  roles:
+    - All
+
+- name: Frontend Server
+  hosts: Frontend
+  become: yes
+  roles:
+    - Frontend
+
+- name: Bdd Server
+  hosts: BDD
+  become: yes
+  roles:
+    - Database
+
+- name: Backend Server
+  hosts: Backend
+  become: yes
+  roles:
+    - Backend
